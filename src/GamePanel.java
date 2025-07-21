@@ -6,7 +6,7 @@ public class GamePanel extends JPanel implements Runnable {
      * Amount of pixels that will be used to represent a tile.
      * A tile will be represented as 16 x 16 pixels.
      */
-    final int tileSize = 16;
+    final int tileSize = 32;
 
     /**
      * Used to scale the tile size.
@@ -24,25 +24,23 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Amount of columns used to form the window.
      */
-    final int windowColumnSize = 16;
+    public final int MAX_WINDOW_COLUMNS = 16;
 
     /**
      * Amount of rows used to form the window.
      */
-    final int windowRowSize = 12;
+    public final int MAX_WINDOW_ROWS = 12;
 
     // Forms a window of 786 x 576 pixels (4:3) ratio
 
-    final int screenWidth = scaledTileSize * windowColumnSize; // 768 pixels
-    final int screenHeight = scaledTileSize * windowRowSize; // 576 pixels
+    final int screenWidth = scaledTileSize * MAX_WINDOW_COLUMNS; // 768 pixels
+    final int screenHeight = scaledTileSize * MAX_WINDOW_ROWS; // 576 pixels
 
     Thread gameThread;
     InputHandler inputHandler = new InputHandler();
 
-    // player position
-    int playerX = 100;
-    int playerY = 100;
-    int playerSpeed = 4;
+    private Player player = new Player(this, inputHandler);
+    private TileManager tileManager = new TileManager(this);
 
     // fps
     private final int FPS = 60;
@@ -71,6 +69,7 @@ public class GamePanel extends JPanel implements Runnable {
         double delta = 0;
         long previousRepaintTime = System.nanoTime();
         long currentRepaintTime;
+        int currentFrameNumber = 1;
 
         while (gameThread != null) {
             currentRepaintTime = System.nanoTime(); // get current time in nanoseconds for high precision
@@ -82,7 +81,13 @@ public class GamePanel extends JPanel implements Runnable {
             previousRepaintTime = currentRepaintTime;
 
             if (delta >= 1) {
-                update();
+                currentFrameNumber++;
+
+                if (currentFrameNumber > FPS) {
+                    currentFrameNumber = 1;
+                }
+
+                update(currentFrameNumber);
                 repaint();
                 delta--;
             }
@@ -94,16 +99,8 @@ public class GamePanel extends JPanel implements Runnable {
     // 1. Get updates
     // 2. Repaint screen
 
-    public void update() {
-        if (inputHandler.up) {
-            playerY -= playerSpeed;
-        } else if (inputHandler.down) {
-            playerY += playerSpeed;
-        } else if (inputHandler.left) {
-            playerX -= playerSpeed;
-        } else if (inputHandler.right) {
-            playerX += playerSpeed;
-        }
+    public void update(int currentFrameNumber) {
+        player.update(currentFrameNumber);
     }
 
     public void paintComponent(Graphics graphics) {
@@ -111,8 +108,8 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D graphics2D = (Graphics2D) graphics;
 
-        graphics2D.setPaint(Color.WHITE);
-        graphics2D.fillRect(playerX, playerY, scaledTileSize, scaledTileSize);
+        tileManager.draw(graphics2D);
+        player.draw(graphics2D);
 
         // garbage collect all graphic objects - used for performance
         graphics2D.dispose();
