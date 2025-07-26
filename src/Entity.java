@@ -1,30 +1,33 @@
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
 public abstract class Entity {
-    private int x, y;
+    private int worldX, worldY;
     private int speed;
     private Direction currentDirection;
-    private HashMap<String, BufferedImage> spriteMapping;
-    private int spriteVariantNumber = 1;
+    private HashMap<String, BufferedImage> spriteImages;
+    private int currentSpriteVariant = 1;
+    private Rectangle hitBox;
+    private boolean collision;
 
-    public int getX() {
-        return x;
+    public int getWorldX() {
+        return worldX;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public void setWorldX(int worldX) {
+        this.worldX = worldX;
     }
 
-    public int getY() {
-        return y;
+    public int getWorldY() {
+        return worldY;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public void setWorldY(int worldY) {
+        this.worldY = worldY;
     }
 
     public int getSpeed() {
@@ -43,12 +46,12 @@ public abstract class Entity {
         this.currentDirection = currentDirection;
     }
 
-    public HashMap<String, BufferedImage> getSpriteMapping() {
-        return spriteMapping;
+    public HashMap<String, BufferedImage> getSpriteImages() {
+        return spriteImages;
     }
 
-    public void setSpriteMapping(HashMap<String, BufferedImage> spriteMapping) {
-        this.spriteMapping = spriteMapping;
+    public void setSpriteImages(HashMap<String, BufferedImage> spriteImages) {
+        this.spriteImages = spriteImages;
     }
 
     public BufferedImage getBufferedImage(String name) {
@@ -63,17 +66,33 @@ public abstract class Entity {
         return bufferedImage;
     }
 
-    public int getSpriteVariantNumber() {
-        return spriteVariantNumber;
+    public int getCurrentSpriteVariant() {
+        return currentSpriteVariant;
     }
 
-    public void setSpriteVariantNumber(int spriteVariantNumber) {
+    public void setCurrentSpriteVariant(int currentSpriteVariant) {
         int maxSpriteVariants = 2;
 
-        if (spriteVariantNumber > maxSpriteVariants) {
-            spriteVariantNumber = 1;
+        if (currentSpriteVariant > maxSpriteVariants) {
+            currentSpriteVariant = 1;
         }
 
-        this.spriteVariantNumber = spriteVariantNumber;
+        this.currentSpriteVariant = currentSpriteVariant;
+    }
+
+    public Rectangle getHitBox() {
+        return hitBox;
+    }
+
+    public void setHitBox(Rectangle hitBox) {
+        this.hitBox = hitBox;
+    }
+
+    public boolean isCollision() {
+        return collision;
+    }
+
+    public void setCollision(boolean collision) {
+        this.collision = collision;
     }
 }

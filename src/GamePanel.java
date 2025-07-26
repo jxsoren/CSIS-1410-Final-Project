@@ -1,23 +1,25 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GamePanel extends JPanel implements Runnable {
     /**
      * Amount of pixels that will be used to represent a tile.
      * A tile will be represented as 16 x 16 pixels.
      */
-    final int tileSize = 32;
+    private final int tileSize = 16;
 
     /**
      * Used to scale the tile size.
      */
-    final int scale = 3;
+    private final int scale = 3;
 
     /**
      * Scales the tile size according to the scale.
      * Creates a 48 x 48 pixel tile
      */
-    final int scaledTileSize = tileSize * scale;
+    private final int scaledTileSize = tileSize * scale;
 
     // Forms a 16 x 12 grid making a 4:3 ratio
 
@@ -33,19 +35,35 @@ public class GamePanel extends JPanel implements Runnable {
 
     // Forms a window of 786 x 576 pixels (4:3) ratio
 
-    final int screenWidth = scaledTileSize * MAX_WINDOW_COLUMNS; // 768 pixels
-    final int screenHeight = scaledTileSize * MAX_WINDOW_ROWS; // 576 pixels
+    // World Settings
+    public final int MAX_WORLD_COLUMNS = 50;
+    public final int MAX_WORLD_ROWS = 50;
 
-    Thread gameThread;
-    InputHandler inputHandler = new InputHandler();
+    public final int WORLD_WIDTH = scaledTileSize * MAX_WORLD_COLUMNS;
+    public final int WORLD_HEIGHT = scaledTileSize * MAX_WORLD_ROWS;
 
-    private Player player = new Player(this, inputHandler);
-    private TileManager tileManager = new TileManager(this);
+    private final int screenWidth = scaledTileSize * MAX_WINDOW_COLUMNS; // 768 pixels
+    private final int screenHeight = scaledTileSize * MAX_WINDOW_ROWS; // 576 pixels
+
+    private Thread gameThread;
+    private final Player player;
+    private final TileManager tileManager;
+    private final CollisionController collisionController;
+    private final ArrayList<GameObject> gameObjects;
+    private final AssetSetter assetSetter;
 
     // fps
     private final int FPS = 60;
 
     public GamePanel() {
+        InputHandler inputHandler = new InputHandler();
+
+        this.player = new Player(this, inputHandler);
+        this.tileManager = new TileManager(this);
+        this.collisionController = new CollisionController(this);
+        this.gameObjects = new ArrayList<>();
+        this.assetSetter = new AssetSetter(this);
+
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
@@ -56,6 +74,10 @@ public class GamePanel extends JPanel implements Runnable {
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
+    }
+
+    public void setupGame() {
+        assetSetter.initializeObjects();
     }
 
     /**
@@ -105,14 +127,47 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
-
         Graphics2D graphics2D = (Graphics2D) graphics;
 
+        // render map
         tileManager.draw(graphics2D);
+
+        for (GameObject gameObject : gameObjects) {
+            gameObject.draw(graphics2D, this);
+        }
+
+        // render player
         player.draw(graphics2D);
 
-        // garbage collect all graphic objects - used for performance
+        // garbage collect all unused graphic objects (helps performance)
         graphics2D.dispose();
     }
 
+    public int getScreenWidth() {
+        return screenWidth;
+    }
+
+    public int getScreenHeight() {
+        return screenHeight;
+    }
+
+    public int getScaledTileSize() {
+        return scaledTileSize;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public TileManager getTileManager() {
+        return tileManager;
+    }
+
+    public CollisionController getCollisionController() {
+        return collisionController;
+    }
+
+    public ArrayList<GameObject> getGameObjects() {
+        return gameObjects;
+    }
 }

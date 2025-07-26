@@ -10,7 +10,6 @@ import java.util.Objects;
 public class TileManager {
     private final GamePanel gamePanel;
     private final Tile[] tiles;
-
     private final int[][] tileMapNumbers;
 
     /**
@@ -22,42 +21,54 @@ public class TileManager {
     public TileManager(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         this.tiles = new Tile[10];
-        this.tileMapNumbers = new int[gamePanel.MAX_WINDOW_COLUMNS][gamePanel.MAX_WINDOW_ROWS];
+        this.tileMapNumbers = new int[gamePanel.MAX_WORLD_COLUMNS][gamePanel.MAX_WORLD_ROWS];
 
         initializeTileImages();
         initializeTileMapNumbers("tiles/tiles.txt");
     }
 
     /**
-     *
      * @param graphics2D
      */
 
     public void draw(Graphics2D graphics2D) {
-        int columnNumber = 0;
-        int rowNumber = 0;
-        int xCoordinate = 0;
-        int yCoordinate = 0;
+        int worldColumn = 0;
+        int worldRow = 0;
 
-        while (columnNumber < gamePanel.MAX_WINDOW_COLUMNS && rowNumber < gamePanel.MAX_WINDOW_ROWS) {
-            int tileNumber = tileMapNumbers[columnNumber][rowNumber]; // fetch tile number for given column and row
+        while (worldColumn < gamePanel.MAX_WORLD_COLUMNS && worldRow < gamePanel.MAX_WORLD_ROWS) {
+            int tileNumber = tileMapNumbers[worldColumn][worldRow]; // fetch tile number for given column and row
             BufferedImage tileImage = tiles[tileNumber].getImage();
 
+            // absolute position of tiles on map
+            int absoluteWorldX = worldColumn * gamePanel.getScaledTileSize();
+            int absoluteWorldY = worldRow * gamePanel.getScaledTileSize();
+
+            // player position on the world map
+            int playerWorldX = gamePanel.getPlayer().getWorldX();
+            int playerWorldY = gamePanel.getPlayer().getWorldY();
+
+            // player position on the screen
+            int playerScreenX = gamePanel.getPlayer().getScreenX();
+            int playerScreenY = gamePanel.getPlayer().getScreenY();
+
+            int screenX = absoluteWorldX - playerWorldX + playerScreenX;
+            int screenY = absoluteWorldY - playerWorldY + playerScreenY;
+
             // draw image on screen
-            graphics2D.drawImage(tileImage, xCoordinate, yCoordinate, gamePanel.scaledTileSize, gamePanel.scaledTileSize, null);
 
-            columnNumber++; // increment column pointer to the next column in matrix
+            if (absoluteWorldX + gamePanel.getScaledTileSize() > gamePanel.getPlayer().getWorldX() - gamePanel.getPlayer().getScreenX() &&
+                    absoluteWorldX - gamePanel.getScaledTileSize() < gamePanel.getPlayer().getWorldX() + gamePanel.getPlayer().getScreenX() &&
+                    absoluteWorldY + gamePanel.getScaledTileSize() > gamePanel.getPlayer().getWorldY() - gamePanel.getPlayer().getScreenY() &&
+                    absoluteWorldY - gamePanel.getScaledTileSize() < gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getScreenY()) {
+                graphics2D.drawImage(tileImage, screenX, screenY, gamePanel.getScaledTileSize(), gamePanel.getScaledTileSize(), null);
+            }
 
-            xCoordinate += gamePanel.scaledTileSize; // increment current X coordinate to the start of the next tile column
+            worldColumn++; // increment column pointer to the next column in matrix
 
             // once you've hit the final column for the row, go to the first column of the next row
-            if (columnNumber == gamePanel.MAX_WINDOW_COLUMNS) {
-                // rest column and current x coordinate pointer
-                columnNumber = 0;
-                xCoordinate = 0;
-
-                rowNumber++; // increment row pointer to the next row in matrix
-                yCoordinate += gamePanel.scaledTileSize; // increment current Y coordinate to the start of the next tile row
+            if (worldColumn == gamePanel.MAX_WORLD_ROWS) {
+                worldColumn = 0; // reset column and current x coordinate pointer
+                worldRow++; // increment row pointer to the next row in matrix
             }
         }
     }
@@ -69,11 +80,59 @@ public class TileManager {
 
     private void initializeTileImages() {
         try {
-            // Grass Tile
+            // TILE 0: Autumn Grass (walkable)
             tiles[0] = new Tile();
-            tiles[0].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/grass.png"))));
+            tiles[0].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/autumn_grass.png"))));
+            tiles[0].setHasCollision(false); // Players can walk on grass
+
+            // TILE 1: Suburban Street (walkable)
+            tiles[1] = new Tile();
+            tiles[1].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/street.png"))));
+            tiles[1].setHasCollision(false); // Players can walk on roads
+
+            // TILE 2: House Floor (walkable)
+            tiles[2] = new Tile();
+            tiles[2].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/house_floor.png"))));
+            tiles[2].setHasCollision(false); // Players can walk inside houses
+
+            // TILE 3: Autumn Tree (blocks movement)
+            tiles[3] = new Tile();
+            tiles[3].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/autumn_tree.png"))));
+            tiles[3].setHasCollision(true); // Trees block movement
+
+            // TILE 4: Jack-o'-Lantern Decoration (walkable)
+            tiles[4] = new Tile();
+            tiles[4].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/jack_o_lantern.png"))));
+            tiles[4].setHasCollision(false); // Decorative, players can walk over
+
+            // TILE 5: House Wall (blocks movement)
+            tiles[5] = new Tile();
+            tiles[5].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/house_wall.png"))));
+            tiles[5].setHasCollision(true); // Walls block movement
+
+            // TILE 6: Front Door (interactable - no collision for now)
+            tiles[6] = new Tile();
+            tiles[6].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/front_door.png"))));
+            tiles[6].setHasCollision(false); // Players need to reach doors to interact (trick-or-treat)
+
+            // TILE 7: Sidewalk (walkable)
+            tiles[7] = new Tile();
+            tiles[7].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/sidewalk.png"))));
+            tiles[7].setHasCollision(false); // Players can walk on sidewalks
+
+            // TILE 8: Park Grass (walkable)
+            tiles[8] = new Tile();
+            tiles[8].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/park_grass.png"))));
+            tiles[8].setHasCollision(false); // Players can walk on park grass
+
+            // TILE 9: Park Bench (blocks movement)
+            tiles[9] = new Tile();
+            tiles[9].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/park_bench.png"))));
+            tiles[9].setHasCollision(true); // Benches block movement
+
         } catch (IOException e) {
             e.printStackTrace();
+            System.err.println("Error loading tile sprites! Make sure all PNG files are in tiles/sprites/ folder");
         }
     }
 
@@ -99,17 +158,17 @@ public class TileManager {
             int columnNumber = 0;
             int rowNumber = 0;
 
-            while (columnNumber < gamePanel.MAX_WINDOW_COLUMNS && rowNumber < gamePanel.MAX_WINDOW_ROWS) {
+            while (columnNumber < gamePanel.MAX_WORLD_COLUMNS && rowNumber < gamePanel.MAX_WORLD_ROWS) {
                 String currentLine = bufferedReader.readLine();
                 String[] rawTileNumbers = currentLine.split(" ");
 
-                while (columnNumber < gamePanel.MAX_WINDOW_COLUMNS) {
+                while (columnNumber < gamePanel.MAX_WORLD_COLUMNS) {
                     int parsedTileNumber = Integer.parseInt(rawTileNumbers[columnNumber]);
                     tileMapNumbers[columnNumber][rowNumber] = parsedTileNumber;
                     columnNumber++;
                 }
 
-                if (columnNumber == gamePanel.MAX_WINDOW_COLUMNS) {
+                if (columnNumber == gamePanel.MAX_WORLD_COLUMNS) {
                     columnNumber = 0;
                     rowNumber++;
                 }
@@ -117,5 +176,13 @@ public class TileManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public int[][] getTileMapNumbers() {
+        return tileMapNumbers;
+    }
+
+    public Tile[] getTiles() {
+        return tiles;
     }
 }
