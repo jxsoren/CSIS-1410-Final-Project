@@ -9,11 +9,9 @@ class MyServiceTest {
 
     private Trick riddle;
 
-    /**
-     * @throws java.lang.Exception
-     */
+
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp()  {
         riddle = new Trick("What do you call a witch's garage?",
                 new String[]{"Broom closet", "Spell shed", "Cauldron cave", "Potion parking"},
                 'A',
@@ -23,13 +21,46 @@ class MyServiceTest {
 
 
     @Test
+    void testBadSnarky() {
+        // bad snarky
+        assertThrows(NullPointerException.class, () -> new Trick("hello world",
+                new String[]{"Broom closet", "Spell shed", "Cauldron cave", "Potion parking"},
+                'A',
+                null));
+    }
+
+    @Test
+    void testBadRiddle() {
+        assertThrows(NullPointerException.class, () -> new Trick(null,
+                new String[]{"Broom closet", "Spell shed", "Cauldron cave", "Potion parking"},
+                'A',
+                "Did you eat all your candy already?"));
+    }
+
+    @Test
+    void testBadMultipleChoice() {
+        assertThrows(NullPointerException.class, () -> new Trick("hello world",
+                new String[]{},
+                'Z',
+                "hello world"));
+    }
+
+    @Test
+    void testBadCorrectAnswer() {
+        assertThrows(IllegalArgumentException.class, () -> new Trick("hello world",
+                new String[]{"Broom closet", "Spell shed", "Cauldron cave", "Potion parking"},
+                'Z',
+                "hello world"));
+    }
+
+    @Test
     void testCheckAnswer_CorrectAnswer() {
-        assertEquals(riddle.checkAnswer('A'), true);
+        assertTrue(riddle.checkAnswer('A'));
     }
 
     @Test
     void testCheckAnswer_IncorrectAnswer() {
-        assertEquals(riddle.checkAnswer('B'), false);
+        assertFalse(riddle.checkAnswer('B'));
     }
 
 
