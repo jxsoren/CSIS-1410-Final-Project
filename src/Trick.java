@@ -1,8 +1,10 @@
+import static java.lang.Character.*;
+
 public class Trick {
-    private final String Question;
-    private final String[] Choices;
+    private final String question;
+    private final String[] choices;
     private final char answer;
-    private final String SnarkyMessage;
+    private final String snarkyMessage;
 
     /**
      * create a Trick (Riddle) with:
@@ -13,14 +15,30 @@ public class Trick {
      * @param snarkyMessage: String, failure message
      */
     public Trick(String question, String[] answers, char correctChoice, String snarkyMessage) {
-        this.Question = question;
-        this.Choices = answers;
+        correctChoice = toUpperCase(correctChoice);
+        if ((question == null) || (question.isEmpty())) {
+            throw new NullPointerException("question must not be null");
+        }
+
+        if (answers.length == 0) {
+            throw new NullPointerException("did not provide choices");
+        }
+        if (correctChoice != 'A' && correctChoice != 'B' && correctChoice != 'C' && correctChoice != 'D') {
+            throw new IllegalArgumentException("correct answer must be: 'A', 'B' , 'C' or 'D' ");
+        }
+
+        if ((snarkyMessage == null) || (snarkyMessage.isEmpty())) {
+            throw new NullPointerException("snarkyMessage must not be null");
+        }
+
+        this.question = question;
+        this.choices = answers;
         this.answer = correctChoice;
-        this.SnarkyMessage = snarkyMessage;
+        this.snarkyMessage = snarkyMessage;
     }
 
     public boolean checkAnswer(char playerChoice) {
-        char upperChoice = Character.toUpperCase(playerChoice);
+        char upperChoice = toUpperCase(playerChoice);
         if (upperChoice == 'A' || upperChoice == 'B' || upperChoice == 'C' || upperChoice == 'D') {
             return upperChoice == answer;
         } else {
@@ -32,20 +50,20 @@ public class Trick {
      * @return SnarkyMessage
      */
     public String getSnarkyMessage() {
-        return SnarkyMessage;
+        return snarkyMessage;
     }
 
     /**
      * @return Question
      */
     public String getQuestion() {
-        return Question;
+        return question;
     }
 
     /**
      * @return Choices
      */
     public String[] getChoices() {
-        return Choices;
+        return choices;
     }
 }
