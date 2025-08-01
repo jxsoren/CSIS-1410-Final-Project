@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MyServiceTest {
+class TestTrick {
 
     private Trick riddle;
 
