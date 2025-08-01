@@ -1,4 +1,4 @@
-import static java.lang.Character.*;
+
 
 public class Trick {
     private final String question;
@@ -15,7 +15,7 @@ public class Trick {
      * @param snarkyMessage: String, failure message
      */
     public Trick(String question, String[] answers, char correctChoice, String snarkyMessage) {
-        correctChoice = toUpperCase(correctChoice);
+        correctChoice = Character.toUpperCase(correctChoice);
         if ((question == null) || (question.isEmpty())) {
             throw new NullPointerException("question must not be null");
         }
@@ -38,7 +38,7 @@ public class Trick {
     }
 
     public boolean checkAnswer(char playerChoice) {
-        char upperChoice = toUpperCase(playerChoice);
+        char upperChoice = Character.toUpperCase(playerChoice);
         if (upperChoice == 'A' || upperChoice == 'B' || upperChoice == 'C' || upperChoice == 'D') {
             return upperChoice == answer;
         } else {
