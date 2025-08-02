@@ -95,23 +95,37 @@ public class GamePanel extends JPanel {
 
     public void handleRequestedDialog() {
         int npcCollisionIndex = collisionController.checkEntityForCollision(player, getNPCs());
-        Entity npc = getNPCs().get(npcCollisionIndex);
-        npc.speak();
-        npc.getDialog().nextLine();
-        getUi().setCurrentDialogLine(npc.getDialog().currentLine());
+        int objectCollisionIndex = collisionController.checkObjectForCollision(player);
+
+        if (npcCollisionIndex >= 0) {
+            handleRequestedNpcDialog(npcCollisionIndex);
+        } else if (objectCollisionIndex >= 0) {
+            handleRequestedObjectDialog(objectCollisionIndex);
+        }
     }
 
-    public void setDialogState() {
-        int npcCollisionIndex = collisionController.checkEntityForCollision(player, getNPCs());
-        if (npcCollisionIndex < 0) {
+    private void handleRequestedNpcDialog(int npcCollisionIndex) {
+        setGameStatus(GameStatus.DIALOG);
+
+        NPC npc = (NPC) getNPCs().get(npcCollisionIndex);
+
+        npc.speak();
+        getUi().setCurrentDialogLine(npc.getDialog().currentLine());
+        npc.getDialog().nextLine();
+    }
+
+    private void handleRequestedObjectDialog(int objectCollisionIndex) {
+        setGameStatus(GameStatus.DIALOG);
+
+        GameObject gameObject = gameObjects.get(objectCollisionIndex);
+
+        if (!(gameObject instanceof Speakable)) {
             return;
         }
 
-        setGameStatus(GameStatus.DIALOG);
-
-        Entity npc = getNPCs().get(npcCollisionIndex);
-        npc.speak();
-        getUi().setCurrentDialogLine(npc.getDialog().currentLine());
+        ((Speakable) gameObject).speak();
+        getUi().setCurrentDialogLine(((Speakable) gameObject).getDialog().currentLine());
+        ((Speakable) gameObject).getDialog().nextLine();
     }
 
     public int getTileSize() {

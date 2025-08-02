@@ -6,7 +6,8 @@ import java.util.Objects;
 public class Candy extends GameObject {
     public Candy() {
         setName("Candy");
-        setHitBox(new HitBox(5, 0, 48, 48));
+        setConsumable(true);
+        setHitBox(new HitBox(0, 0, 48, 48));
 
         try {
             BufferedImage image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/objects/candy.png")));

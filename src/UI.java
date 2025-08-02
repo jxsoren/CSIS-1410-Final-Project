@@ -135,7 +135,7 @@ public class UI {
     }
 
     private void drawDebugInfo() {
-        graphics2D.setColor(Color.RED);
+        graphics2D.setColor(Color.YELLOW);
         graphics2D.setFont(graphics2D.getFont().deriveFont(30F));
 
         String playerCoordinates = String.format("World X:  %s  | World Y:  %s", gamePanel.getPlayer().getWorldX(), gamePanel.getPlayer().getWorldY());
@@ -143,6 +143,9 @@ public class UI {
 
         String screenCoordinates = String.format("Screen X:  %s  | Screen Y:  %s", gamePanel.getPlayer().getScreenX(), gamePanel.getPlayer().getScreenY());
         graphics2D.drawString(screenCoordinates, gamePanel.getTileSize() / 2, gamePanel.getTileSize() * 4);
+
+        String worldTileCoordinates = String.format("World X Tile:  %s  | World Y Tile:  %s", gamePanel.getPlayer().getWorldX() / gamePanel.getTileSize(), gamePanel.getPlayer().getWorldY() / gamePanel.getTileSize());
+        graphics2D.drawString(worldTileCoordinates, gamePanel.getTileSize() / 2, gamePanel.getTileSize() * 5);
     }
 
     private void drawPausedScreen() {

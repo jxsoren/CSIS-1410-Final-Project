@@ -37,15 +37,7 @@ public class InputHandler implements KeyListener {
                     case KeyEvent.VK_A, KeyEvent.VK_LEFT -> left = true;
                     case KeyEvent.VK_D, KeyEvent.VK_RIGHT -> right = true;
                     case KeyEvent.VK_ESCAPE -> gamePanel.setGameStatus(GameStatus.PAUSED);
-
-                    // Need to add logic that basically will end the dialog if
-
-                    // What if I make it so that this will set the game state in a status of dialog
-                    // and then wherever I process the dialog state, I could check to see if there
-                    // are any more dialog lines remaining and if there are, then we need to find
-                    // some way to iterate through that list
-
-                    case KeyEvent.VK_ENTER -> gamePanel.setDialogState();
+                    case KeyEvent.VK_ENTER -> gamePanel.handleRequestedDialog();
                 }
             }
             case GameStatus.PAUSED -> {

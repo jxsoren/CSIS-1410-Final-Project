@@ -1,11 +1,16 @@
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Objects;
 
 public abstract class GameObject {
     private BufferedImage image;
     private String name;
     private HitBox hitBox;
     private boolean collision;
+    private boolean consumable;
+    private boolean interactable;
     private int worldX;
     private int worldY;
 
@@ -19,6 +24,9 @@ public abstract class GameObject {
                 worldY - gamePanel.getTileSize() < gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getScreenY()) {
             graphics2D.drawImage(image, screenX, screenY, gamePanel.getTileSize(), gamePanel.getTileSize(), null);
         }
+    }
+
+    public void interact() {
     }
 
     public BufferedImage getImage() {
@@ -67,5 +75,21 @@ public abstract class GameObject {
 
     public void setHitBox(HitBox hitBox) {
         this.hitBox = hitBox;
+    }
+
+    public boolean isConsumable() {
+        return consumable;
+    }
+
+    public void setConsumable(boolean consumable) {
+        this.consumable = consumable;
+    }
+
+    public boolean isInteractable() {
+        return interactable;
+    }
+
+    public void setInteractable(boolean interactable) {
+        this.interactable = interactable;
     }
 }
