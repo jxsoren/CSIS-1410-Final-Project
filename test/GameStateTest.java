@@ -40,3 +40,4 @@ public class GameStateTest {
         assertEquals("Red: 1/3, Green: 0/2, Blue: 0/1", game.getProgressSummary());
     }
 }
+
