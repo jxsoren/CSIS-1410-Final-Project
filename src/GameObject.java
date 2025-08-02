@@ -4,18 +4,20 @@ import java.awt.image.BufferedImage;
 public abstract class GameObject {
     private BufferedImage image;
     private String name;
+    private HitBox hitBox;
     private boolean collision;
-    private int worldX, worldY;
+    private int worldX;
+    private int worldY;
 
     public void draw(Graphics2D graphics2D, GamePanel gamePanel) {
         int screenX = worldX - gamePanel.getPlayer().getWorldX() + gamePanel.getPlayer().getScreenX();
         int screenY = worldY - gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getScreenY();
 
-        if (worldX + gamePanel.getScaledTileSize() > gamePanel.getPlayer().getWorldX() - gamePanel.getPlayer().getScreenX() &&
-                worldX - gamePanel.getScaledTileSize() < gamePanel.getPlayer().getWorldX() + gamePanel.getPlayer().getScreenX() &&
-                worldY + gamePanel.getScaledTileSize() > gamePanel.getPlayer().getWorldY() - gamePanel.getPlayer().getScreenY() &&
-                worldY - gamePanel.getScaledTileSize() < gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getScreenY()) {
-            graphics2D.drawImage(image, screenX, screenY, gamePanel.getScaledTileSize(), gamePanel.getScaledTileSize(), null);
+        if (worldX + gamePanel.getTileSize() > gamePanel.getPlayer().getWorldX() - gamePanel.getPlayer().getScreenX() &&
+                worldX - gamePanel.getTileSize() < gamePanel.getPlayer().getWorldX() + gamePanel.getPlayer().getScreenX() &&
+                worldY + gamePanel.getTileSize() > gamePanel.getPlayer().getWorldY() - gamePanel.getPlayer().getScreenY() &&
+                worldY - gamePanel.getTileSize() < gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getScreenY()) {
+            graphics2D.drawImage(image, screenX, screenY, gamePanel.getTileSize(), gamePanel.getTileSize(), null);
         }
     }
 
@@ -35,7 +37,7 @@ public abstract class GameObject {
         this.name = name;
     }
 
-    public boolean isCollision() {
+    public boolean hasCollision() {
         return collision;
     }
 
@@ -57,5 +59,13 @@ public abstract class GameObject {
 
     public void setWorldY(int worldY) {
         this.worldY = worldY;
+    }
+
+    public HitBox getHitBox() {
+        return hitBox;
+    }
+
+    public void setHitBox(HitBox hitBox) {
+        this.hitBox = hitBox;
     }
 }

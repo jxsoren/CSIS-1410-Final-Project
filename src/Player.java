@@ -3,15 +3,14 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 public class Player extends Entity {
-    private final GamePanel gamePanel;
     private final InputHandler inputHandler;
-
-    private int screenX, screenY;
+    private int screenX;
+    private int screenY;
+    private int candyCount;
 
     public Player(GamePanel gamePanel, InputHandler inputHandler) {
-        this.gamePanel = gamePanel;
+        super(gamePanel);
         this.inputHandler = inputHandler;
-
         initializePlayerInScreen(gamePanel);
         initializePlayerImages();
 
@@ -20,11 +19,13 @@ public class Player extends Entity {
         setSpeed(4);
         setCollision(false);
         setCurrentDirection(Direction.DOWN);
-        setHitBox(new Rectangle(8, 16, gamePanel.getScaledTileSize() / 2, gamePanel.getScaledTileSize() / 2));
+        setHitBox(new HitBox(8, 16, gamePanel.getTileSize() / 2, gamePanel.getTileSize() / 2));
     }
 
     public void update(int currentFrameNumber) {
         if (playerIsInMotion()) {
+            setCollision(false);
+
             // every 10 frames change the sprite image
             if (currentFrameNumber % 10 == 0) {
                 int currentSpriteVariationNumber = getCurrentSpriteVariant();
@@ -41,18 +42,38 @@ public class Player extends Entity {
                 setCurrentDirection(Direction.RIGHT);
             }
 
-            setCollision(false);
-            gamePanel.getCollisionController().checkTileForCollision(this);
+            getGamePanel().getCollisionController().checkTileForCollision(this);
 
-            if (!isCollision()) {
-                switch (getCurrentDirection()) {
-                    case UP -> setWorldY(getWorldY() - getSpeed());
-                    case DOWN -> setWorldY(getWorldY() + getSpeed());
-                    case LEFT -> setWorldX(getWorldX() - getSpeed());
-                    case RIGHT -> setWorldX(getWorldX() + getSpeed());
-                }
+            int gameObjectIndex = getGamePanel().getCollisionController().checkObjectForCollision(this);
+            if (gameObjectIndex >= 0) {
+                pickUpObject(gameObjectIndex);
             }
+
+            int npcCollisionIndex = getGamePanel().getCollisionController().checkEntityForCollision(this, getGamePanel().getNPCs());
+            interactWithNPC(npcCollisionIndex);
+
+            if (getGamePanel().getInputHandler().enterPressed) {
+
+            }
+
+            move();
         }
+    }
+
+    private void interactWithNPC(int npcCollisionIndex) {
+        if (npcCollisionIndex < 0) {
+            return;
+        }
+
+        getGamePanel().setGameStatus(GameStatus.DIALOG);
+
+        Entity npc = getGamePanel().getNPCs().get(npcCollisionIndex);
+
+        npc.speak();
+        getGamePanel().getUi().setCurrentDialogLine(npc.getDialog().currentLine());
+        npc.getDialog().nextLine();
+
+        //        getGamePanel().getInputHandler().enterPressed = false;
     }
 
     public void draw(Graphics2D graphics2D) {
@@ -67,7 +88,19 @@ public class Player extends Entity {
             case RIGHT -> playerImage = getSpriteImages().get("right" + currentSpriteVariationNumber);
         }
 
-        graphics2D.drawImage(playerImage, getScreenX(), getScreenY(), gamePanel.getScaledTileSize(), gamePanel.getScaledTileSize(), null);
+        graphics2D.drawImage(playerImage, getScreenX(), getScreenY(), getGamePanel().getTileSize(), getGamePanel().getTileSize(), null);
+        graphics2D.setColor(Color.RED);
+        graphics2D.drawRect(screenX + getHitBox().x, screenY + getHitBox().y, getHitBox().width, getHitBox().height);
+    }
+
+    public void pickUpObject(int objectIndex) {
+        if (objectIndex < 0) {
+            return;
+        }
+
+        candyCount++;
+        getGamePanel().getGameObjects().remove(objectIndex);
+        getGamePanel().getUi().setMessage("You collected something!");
     }
 
     public int getScreenX() {
@@ -85,9 +118,9 @@ public class Player extends Entity {
      */
 
     private void initializePlayerInScreen(GamePanel gamePanel) {
-        int halfTileLength = gamePanel.getScaledTileSize() / 2;
-        this.screenX = gamePanel.getScreenWidth() / 2 - halfTileLength;
-        this.screenY = gamePanel.getScreenHeight() / 2 - halfTileLength;
+        int halfTileLength = gamePanel.getTileSize() / 2;
+        this.screenX = gamePanel.SCREEN_WIDTH / 2 - halfTileLength;
+        this.screenY = gamePanel.SCREEN_HEIGHT / 2 - halfTileLength;
     }
 
     private void initializePlayerImages() {
@@ -108,4 +141,11 @@ public class Player extends Entity {
         return inputHandler.up || inputHandler.down || inputHandler.left || inputHandler.right;
     }
 
+    public int getCandyCount() {
+        return candyCount;
+    }
+
+    public void setCandyCount(int candyCount) {
+        this.candyCount = candyCount;
+    }
 }

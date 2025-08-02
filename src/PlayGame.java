@@ -1,8 +1,9 @@
 import javax.swing.*;
 
-public class Window {
+public class PlayGame {
     private static JFrame window;
     private static GamePanel gamePanel;
+    private static GameLoop gameLoop;
 
     public static void main(String[] args) {
         window = new JFrame();
@@ -18,7 +19,8 @@ public class Window {
         window.pack();
 
         gamePanel.setupGame();
-        gamePanel.startGameThread();
-    }
 
+        gameLoop = new GameLoop(gamePanel);
+        gameLoop.start();
+    }
 }

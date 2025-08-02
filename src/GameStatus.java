@@ -1,3 +1,3 @@
 public enum GameStatus {
-    RUNNING, STOPPED
+    TITLE_SCREEN, PAUSED, RUNNING, DIALOG
 }
