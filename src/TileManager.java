@@ -1,15 +1,14 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class TileManager {
     private final GamePanel gamePanel;
-    private final Tile[] tiles;
+    private final List<Tile> tiles;
     private final int[][] tileMapNumbers;
 
     /**
@@ -17,10 +16,9 @@ public class TileManager {
      *
      * @param gamePanel main game panel
      */
-
     public TileManager(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
-        this.tiles = new Tile[10];
+        this.tiles = new ArrayList<>();
         this.tileMapNumbers = new int[gamePanel.MAX_WORLD_COLUMNS][gamePanel.MAX_WORLD_ROWS];
 
         initializeTileImages();
@@ -28,20 +26,19 @@ public class TileManager {
     }
 
     /**
-     * @param graphics2D
+     * @param graphics2D Graphics2D Object
      */
-
     public void draw(Graphics2D graphics2D) {
         int worldColumn = 0;
         int worldRow = 0;
 
         while (worldColumn < gamePanel.MAX_WORLD_COLUMNS && worldRow < gamePanel.MAX_WORLD_ROWS) {
             int tileNumber = tileMapNumbers[worldColumn][worldRow]; // fetch tile number for given column and row
-            BufferedImage tileImage = tiles[tileNumber].getImage();
+            BufferedImage tileImage = tiles.get(tileNumber).getImage();
 
             // absolute position of tiles on map
-            int absoluteWorldX = worldColumn * gamePanel.getScaledTileSize();
-            int absoluteWorldY = worldRow * gamePanel.getScaledTileSize();
+            int absoluteWorldX = worldColumn * gamePanel.getTileSize();
+            int absoluteWorldY = worldRow * gamePanel.getTileSize();
 
             // player position on the world map
             int playerWorldX = gamePanel.getPlayer().getWorldX();
@@ -54,14 +51,8 @@ public class TileManager {
             int screenX = absoluteWorldX - playerWorldX + playerScreenX;
             int screenY = absoluteWorldY - playerWorldY + playerScreenY;
 
-            // draw image on screen
-
-            if (absoluteWorldX + gamePanel.getScaledTileSize() > gamePanel.getPlayer().getWorldX() - gamePanel.getPlayer().getScreenX() &&
-                    absoluteWorldX - gamePanel.getScaledTileSize() < gamePanel.getPlayer().getWorldX() + gamePanel.getPlayer().getScreenX() &&
-                    absoluteWorldY + gamePanel.getScaledTileSize() > gamePanel.getPlayer().getWorldY() - gamePanel.getPlayer().getScreenY() &&
-                    absoluteWorldY - gamePanel.getScaledTileSize() < gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getScreenY()) {
-                graphics2D.drawImage(tileImage, screenX, screenY, gamePanel.getScaledTileSize(), gamePanel.getScaledTileSize(), null);
-            }
+            // draw tiles on screen
+            graphics2D.drawImage(tileImage, screenX, screenY, gamePanel.getTileSize(), gamePanel.getTileSize(), null);
 
             worldColumn++; // increment column pointer to the next column in matrix
 
@@ -79,60 +70,21 @@ public class TileManager {
      */
 
     private void initializeTileImages() {
-        try {
-            // TILE 0: Autumn Grass (walkable)
-            tiles[0] = new Tile();
-            tiles[0].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/autumn_grass.png"))));
-            tiles[0].setHasCollision(false); // Players can walk on grass
+        for (int i = 0; i <= 56; i++) {
+            try {
+                String imagePath = String.format("tiles/mapTiles/tile_%s.png", i);
+                BufferedImage tileImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
 
-            // TILE 1: Suburban Street (walkable)
-            tiles[1] = new Tile();
-            tiles[1].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/street.png"))));
-            tiles[1].setHasCollision(false); // Players can walk on roads
+                Tile tile = new Tile(tileImage);
 
-            // TILE 2: House Floor (walkable)
-            tiles[2] = new Tile();
-            tiles[2].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/house_floor.png"))));
-            tiles[2].setHasCollision(false); // Players can walk inside houses
+                if (i >= 4 && i <= 44) {
+                    tile.setHasCollision(true);
+                }
 
-            // TILE 3: Autumn Tree (blocks movement)
-            tiles[3] = new Tile();
-            tiles[3].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/autumn_tree.png"))));
-            tiles[3].setHasCollision(true); // Trees block movement
-
-            // TILE 4: Jack-o'-Lantern Decoration (walkable)
-            tiles[4] = new Tile();
-            tiles[4].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/jack_o_lantern.png"))));
-            tiles[4].setHasCollision(false); // Decorative, players can walk over
-
-            // TILE 5: House Wall (blocks movement)
-            tiles[5] = new Tile();
-            tiles[5].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/house_wall.png"))));
-            tiles[5].setHasCollision(true); // Walls block movement
-
-            // TILE 6: Front Door (interactable - no collision for now)
-            tiles[6] = new Tile();
-            tiles[6].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/front_door.png"))));
-            tiles[6].setHasCollision(false); // Players need to reach doors to interact (trick-or-treat)
-
-            // TILE 7: Sidewalk (walkable)
-            tiles[7] = new Tile();
-            tiles[7].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/sidewalk.png"))));
-            tiles[7].setHasCollision(false); // Players can walk on sidewalks
-
-            // TILE 8: Park Grass (walkable)
-            tiles[8] = new Tile();
-            tiles[8].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/park_grass.png"))));
-            tiles[8].setHasCollision(false); // Players can walk on park grass
-
-            // TILE 9: Park Bench (blocks movement)
-            tiles[9] = new Tile();
-            tiles[9].setImage(ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("tiles/sprites/park_bench.png"))));
-            tiles[9].setHasCollision(true); // Benches block movement
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading tile sprites! Make sure all PNG files are in tiles/sprites/ folder");
+                tiles.add(tile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -182,7 +134,7 @@ public class TileManager {
         return tileMapNumbers;
     }
 
-    public Tile[] getTiles() {
+    public List<Tile> getTiles() {
         return tiles;
     }
 }
