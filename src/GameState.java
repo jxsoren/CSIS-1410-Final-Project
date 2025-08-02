@@ -2,7 +2,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class GameState {
-    private Map<CandyType, Integer> candyInventory;
+    private final Map<CandyType, Integer> candyInventory;
 
     public GameState() {
         candyInventory = new EnumMap<>(CandyType.class);
@@ -40,3 +40,4 @@ public class GameState {
                 "Blue: " + candyInventory.get(CandyType.BLUE) + "/1";
     }
 }
+
