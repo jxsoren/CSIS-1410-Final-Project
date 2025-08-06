@@ -27,9 +27,9 @@ public class CandyBucket {
 
     public void removeCandy(CandyType candyType) {
         int candyQuantity = candyStash.get(candyType);
-        if (candyQuantity > 0) {
-            candyStash.put(candyType, candyQuantity - 1);
-        }
+        //        if (candyQuantity > 0) {
+        //        }
+        candyStash.put(candyType, candyQuantity - 1);
     }
 
     private void initializeCandyStash() {

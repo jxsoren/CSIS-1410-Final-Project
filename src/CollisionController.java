@@ -69,8 +69,8 @@ public class CollisionController {
         }
     }
 
-    public int checkObjectForCollision(Entity entity) {
-        int objectIndex = -1;
+    public GameObject checkObjectForCollision(Entity entity) {
+        GameObject collidedGameObject = null;
 
         for (GameObject gameObject : gamePanel.getGameObjects()) {
             // update entity's hit box to their current position in the world
@@ -86,28 +86,28 @@ public class CollisionController {
                     entity.getHitBox().y -= entity.getSpeed();
                     if (collisionDetected(entity, gameObject)) {
                         checkTilesForCollision(gameObject.hasCollision(), entity);
-                        objectIndex = gamePanel.getGameObjects().indexOf(gameObject);
+                        collidedGameObject = gameObject;
                     }
                 }
                 case Direction.DOWN -> {
                     entity.getHitBox().y += entity.getSpeed();
                     if (collisionDetected(entity, gameObject)) {
                         checkTilesForCollision(gameObject.hasCollision(), entity);
-                        objectIndex = gamePanel.getGameObjects().indexOf(gameObject);
+                        collidedGameObject = gameObject;
                     }
                 }
                 case Direction.LEFT -> {
                     entity.getHitBox().x -= entity.getSpeed();
                     if (collisionDetected(entity, gameObject)) {
                         checkTilesForCollision(gameObject.hasCollision(), entity);
-                        objectIndex = gamePanel.getGameObjects().indexOf(gameObject);
+                        collidedGameObject = gameObject;
                     }
                 }
                 case Direction.RIGHT -> {
                     entity.getHitBox().x += entity.getSpeed();
                     if (collisionDetected(entity, gameObject)) {
                         checkTilesForCollision(gameObject.hasCollision(), entity);
-                        objectIndex = gamePanel.getGameObjects().indexOf(gameObject);
+                        collidedGameObject = gameObject;
                     }
                 }
             }
@@ -117,12 +117,11 @@ public class CollisionController {
             gameObject.getHitBox().reset();
         }
 
-        return objectIndex;
+        return collidedGameObject;
     }
 
-    public int checkEntityForCollision(Entity entity, ArrayList<Entity> otherEntities) {
-        int npcIndex = -1;
-        ArrayList<Entity> NPCs = gamePanel.getNPCs();
+    public Entity checkEntityForCollision(Entity entity, ArrayList<Entity> otherEntities) {
+        Entity collidedEntity = null;
 
         for (Entity otherEntity : otherEntities) {
             // update entity's hit box to their current position in the world
@@ -138,28 +137,28 @@ public class CollisionController {
                     entity.getHitBox().y -= entity.getSpeed();
                     if (collisionDetected(entity, otherEntity)) {
                         entity.setCollision(true);
-                        npcIndex = NPCs.indexOf(otherEntity);
+                        collidedEntity = otherEntity;
                     }
                 }
                 case Direction.DOWN -> {
                     entity.getHitBox().y += entity.getSpeed();
                     if (collisionDetected(entity, otherEntity)) {
                         entity.setCollision(true);
-                        npcIndex = NPCs.indexOf(otherEntity);
+                        collidedEntity = otherEntity;
                     }
                 }
                 case Direction.LEFT -> {
                     entity.getHitBox().x -= entity.getSpeed();
                     if (collisionDetected(entity, otherEntity)) {
                         entity.setCollision(true);
-                        npcIndex = NPCs.indexOf(otherEntity);
+                        collidedEntity = otherEntity;
                     }
                 }
                 case Direction.RIGHT -> {
                     entity.getHitBox().x += entity.getSpeed();
                     if (collisionDetected(entity, otherEntity)) {
                         entity.setCollision(true);
-                        npcIndex = NPCs.indexOf(otherEntity);
+                        collidedEntity = otherEntity;
                     }
                 }
             }
@@ -169,7 +168,7 @@ public class CollisionController {
             otherEntity.getHitBox().reset();
         }
 
-        return npcIndex;
+        return collidedEntity;
     }
 
     public void checkPlayerForCollision(Entity entity) {

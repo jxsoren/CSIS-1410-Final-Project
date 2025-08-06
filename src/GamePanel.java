@@ -1,21 +1,22 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class GamePanel extends JPanel {
     private final int baseTileSize = 16;
-    private final int tileSizeScale = 3;
+    private final int tileSizeScale = 5;
     private final int tileSize = baseTileSize * tileSizeScale;
 
     // World Settings
-    public final int MAX_WORLD_COLUMNS = 40;
-    public final int MAX_WORLD_ROWS = 30;
+    public final int MAX_WORLD_COLUMNS = 80;
+    public final int MAX_WORLD_ROWS = 60;
 
     public final int WORLD_WIDTH = tileSize * MAX_WORLD_COLUMNS;
     public final int WORLD_HEIGHT = tileSize * MAX_WORLD_ROWS;
 
     // Screen Settings
-    public final int MAX_WINDOW_COLUMNS = 16;
+    public final int MAX_WINDOW_COLUMNS = 20;
     public final int MAX_WINDOW_ROWS = 12;
 
     public final int SCREEN_WIDTH = tileSize * MAX_WINDOW_COLUMNS;
@@ -30,9 +31,11 @@ public class GamePanel extends JPanel {
     private final AssetSetter assetSetter;
     private final UI ui;
     private GameStatus gameStatus;
+    private final GameState gameState;
 
     public GamePanel() {
-        inputHandler = new InputHandler(this);
+        this.gameState = new GameState();
+        this.inputHandler = new InputHandler(this);
         this.player = new Player(this, inputHandler);
         this.tileManager = new TileManager(this);
         this.collisionController = new CollisionController(this);
@@ -55,6 +58,10 @@ public class GamePanel extends JPanel {
     }
 
     public void update(int currentFrameNumber) {
+        if (gameState.gameWinConditionMet()) {
+            setGameStatus(GameStatus.GAME_OVER);
+        }
+
         if (gameStatus == GameStatus.RUNNING) {
             for (Entity npc : NPCs) {
                 npc.update(currentFrameNumber);
@@ -91,41 +98,94 @@ public class GamePanel extends JPanel {
             // render UI
             ui.draw(graphics2D);
         }
+
+        graphics2D.dispose();
     }
 
     public void handleRequestedDialog() {
-        int npcCollisionIndex = collisionController.checkEntityForCollision(player, getNPCs());
-        int objectCollisionIndex = collisionController.checkObjectForCollision(player);
+        NPC collidedNPC = (NPC) collisionController.checkEntityForCollision(player, getNPCs());
+        GameObject collidedObject = collisionController.checkObjectForCollision(player);
 
-        if (npcCollisionIndex >= 0) {
-            handleRequestedNpcDialog(npcCollisionIndex);
-        } else if (objectCollisionIndex >= 0) {
-            handleRequestedObjectDialog(objectCollisionIndex);
+        if (collidedNPC != null) {
+            handleRequestedNpcDialog(collidedNPC);
+        } else if (collidedObject != null) {
+            handleRequestedObjectDialog(collidedObject);
         }
     }
 
-    private void handleRequestedNpcDialog(int npcCollisionIndex) {
-        setGameStatus(GameStatus.DIALOG);
+    public void handleRequestedDialogQuestion(GameObject collidedObject) {
+        HouseDoor collidedDoor = (HouseDoor) collidedObject;
 
-        NPC npc = (NPC) getNPCs().get(npcCollisionIndex);
-
-        npc.speak();
-        getUi().setCurrentDialogLine(npc.getDialog().currentLine());
-        npc.getDialog().nextLine();
-    }
-
-    private void handleRequestedObjectDialog(int objectCollisionIndex) {
-        setGameStatus(GameStatus.DIALOG);
-
-        GameObject gameObject = gameObjects.get(objectCollisionIndex);
-
-        if (!(gameObject instanceof Speakable)) {
+        if (collidedDoor.getDialog().isDialogSequenceCompleted()) {
+            ui.setCurrentDialogLine(null);
+            setGameStatus(GameStatus.RUNNING);
+            collidedDoor.getDialog().resetDialog();
             return;
         }
 
-        ((Speakable) gameObject).speak();
-        getUi().setCurrentDialogLine(((Speakable) gameObject).getDialog().currentLine());
-        ((Speakable) gameObject).getDialog().nextLine();
+        if (collidedDoor.isRiddleAttempted()) {
+            collidedDoor.alreadyVisitedResponse();
+            getUi().setCurrentDialogLine(collidedDoor.getDialog().currentLine());
+            return;
+        }
+
+        setGameStatus(GameStatus.DIALOG);
+
+        collidedDoor.speak(this.ui);
+        Trick houseTrick = collidedDoor.getTrick();
+        getUi().setCurrentDialogLine(collidedDoor.getDialog().currentLine());
+
+        int chosenOption = getUi().getDialogOptionNumber();
+
+        if (chosenOption > 0) {
+            char letterForChosenOption = 0;
+
+            switch (chosenOption) {
+                case 1 -> letterForChosenOption = 'A';
+                case 2 -> letterForChosenOption = 'B';
+                case 3 -> letterForChosenOption = 'C';
+                case 4 -> letterForChosenOption = 'D';
+            }
+
+            if (houseTrick.isCorrectAnswer(letterForChosenOption)) {
+                collidedDoor.giveCandy(gameState.getCandyBucket());
+            } else {
+                collidedDoor.takeCandy(CandyType.RED, gameState.getCandyBucket());
+            }
+
+            collidedDoor.setTrickResponse();
+            getUi().setCurrentDialogLine(collidedDoor.getDialog().currentLine());
+            collidedDoor.getDialog().nextLine();
+            getUi().resetDialogOptionNumber();
+        }
+    }
+
+
+    private void handleRequestedNpcDialog(NPC collidedNPC) {
+        if (collidedNPC.getDialog().isDialogSequenceCompleted()) {
+            ui.setCurrentDialogLine(null);
+            setGameStatus(GameStatus.RUNNING);
+            collidedNPC.getDialog().resetDialog();
+            return;
+        }
+
+        // reward player w/ rare blue candy for finding ghost costume
+        if (collidedNPC.getNpcType() == NPCType.GHOST_KID) {
+            // only reward the player once
+            if (gameState.getCandyBucket().getCandyQuantity(CandyType.BLUE) < 1) {
+                gameState.getCandyBucket().addCandy(CandyType.BLUE);
+            }
+        }
+
+        setGameStatus(GameStatus.DIALOG);
+
+        collidedNPC.speak(ui);
+        getUi().setCurrentDialogLine(collidedNPC.getDialog().currentLine());
+        collidedNPC.getDialog().nextLine();
+    }
+
+    private void handleRequestedObjectDialog(GameObject collidedObject) {
+        handleRequestedDialogQuestion(collidedObject);
     }
 
     public int getTileSize() {
@@ -166,5 +226,9 @@ public class GamePanel extends JPanel {
 
     public void setGameStatus(GameStatus gameStatus) {
         this.gameStatus = gameStatus;
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 }

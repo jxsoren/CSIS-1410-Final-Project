@@ -4,12 +4,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class Entity {
     private final GamePanel gamePanel;
     private Direction currentDirection;
-    private HashMap<String, BufferedImage> spriteImages;
+    private Map<String, BufferedImage> spriteImages;
     private HitBox hitBox;
     private final Dialog dialog;
     private int worldX;
@@ -61,19 +62,7 @@ public abstract class Entity {
 
             graphics2D.drawImage(image, screenX, screenY, gamePanel.getTileSize(), gamePanel.getTileSize(), null);
             graphics2D.setColor(Color.RED);
-            graphics2D.drawRect(screenX + getHitBox().x, screenY + getHitBox().y, getHitBox().width, getHitBox().height);
-        }
-    }
-
-    public void speak() {
-        //        if (!dialog.linesCompleted()) {}
-
-        // Face Player When Communicating
-        switch (gamePanel.getPlayer().getCurrentDirection()) {
-            case Direction.UP -> setCurrentDirection(Direction.DOWN);
-            case Direction.DOWN -> setCurrentDirection(Direction.UP);
-            case Direction.LEFT -> setCurrentDirection(Direction.RIGHT);
-            case Direction.RIGHT -> setCurrentDirection(Direction.LEFT);
+            //            graphics2D.drawRect(screenX + getHitBox().x, screenY + getHitBox().y, getHitBox().width, getHitBox().height);
         }
     }
 
@@ -120,11 +109,11 @@ public abstract class Entity {
         this.currentDirection = currentDirection;
     }
 
-    public HashMap<String, BufferedImage> getSpriteImages() {
+    public Map<String, BufferedImage> getSpriteImages() {
         return spriteImages;
     }
 
-    public void setSpriteImages(HashMap<String, BufferedImage> spriteImages) {
+    public void setSpriteImages(Map<String, BufferedImage> spriteImages) {
         this.spriteImages = spriteImages;
     }
 

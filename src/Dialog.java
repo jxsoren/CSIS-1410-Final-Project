@@ -2,15 +2,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Dialog {
-    private final List<String> dialogLines;
+    private final List<DialogLine> dialogLines;
     private int currentLineIndex;
+    private boolean dialogSequenceCompleted;
 
     public Dialog() {
         this.currentLineIndex = 0;
         this.dialogLines = new ArrayList<>();
     }
 
-    public String currentLine() {
+    public DialogLine currentLine() {
         if (currentLineIndex < dialogLines.size()) {
             return dialogLines.get(currentLineIndex);
         }
@@ -21,6 +22,7 @@ public class Dialog {
     public void nextLine() {
         currentLineIndex++;
         if (linesCompleted()) {
+            dialogSequenceCompleted = true;
             currentLineIndex = 0;
         }
     }
@@ -29,7 +31,20 @@ public class Dialog {
         return currentLineIndex >= dialogLines.size();
     }
 
-    public void setDialogLines(List<String> dialogLines) {
+    public void addDialogLines(List<DialogLine> dialogLines) {
         this.dialogLines.addAll(dialogLines);
+    }
+
+    public boolean isDialogSequenceCompleted() {
+        return dialogSequenceCompleted;
+    }
+
+    public void resetDialog() {
+        currentLineIndex = 0;
+        dialogSequenceCompleted = false;
+    }
+
+    public void clearDialogLines() {
+        this.dialogLines.clear();
     }
 }

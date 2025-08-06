@@ -26,9 +26,6 @@ public abstract class GameObject {
         }
     }
 
-    public void interact() {
-    }
-
     public BufferedImage getImage() {
         return image;
     }

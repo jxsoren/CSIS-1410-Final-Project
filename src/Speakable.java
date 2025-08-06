@@ -1,5 +1,5 @@
 public interface Speakable {
-    void speak();
+    public abstract void speak(UI ui);
 
-    Dialog getDialog();
+    public abstract Dialog getDialog();
 }

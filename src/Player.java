@@ -6,7 +6,6 @@ public class Player extends Entity {
     private final InputHandler inputHandler;
     private int screenX;
     private int screenY;
-    private int candyCount;
 
     public Player(GamePanel gamePanel, InputHandler inputHandler) {
         super(gamePanel);
@@ -14,11 +13,11 @@ public class Player extends Entity {
         initializePlayerInScreen(gamePanel);
         initializePlayerImages();
 
-        setWorldX(700);
-        setWorldY(700);
-        setSpeed(4);
+        setWorldX(gamePanel.getTileSize() * 25);
+        setWorldY(gamePanel.getTileSize() * 35);
+        setSpeed(6);
         setCollision(false);
-        setCurrentDirection(Direction.DOWN);
+        setCurrentDirection(Direction.RIGHT);
         setHitBox(new HitBox(8, 16, gamePanel.getTileSize() / 2, gamePanel.getTileSize() / 2));
     }
 
@@ -44,32 +43,29 @@ public class Player extends Entity {
 
             getGamePanel().getCollisionController().checkTileForCollision(this);
 
-            int gameObjectIndex = getGamePanel().getCollisionController().checkObjectForCollision(this);
-            if (gameObjectIndex >= 0) {
-                pickUpObject(gameObjectIndex);
+            GameObject collidedGameObject = getGamePanel().getCollisionController().checkObjectForCollision(this);
+            if (collidedGameObject instanceof Candy) {
+                pickUpObject(collidedGameObject);
             }
 
-            int npcCollisionIndex = getGamePanel().getCollisionController().checkEntityForCollision(this, getGamePanel().getNPCs());
-            interactWithNPC(npcCollisionIndex);
+            NPC collidedNPC = (NPC) getGamePanel().getCollisionController().checkEntityForCollision(this, getGamePanel().getNPCs());
+            interactWithNPC(collidedNPC);
 
             move();
         }
     }
 
-    private void interactWithNPC(int npcCollisionIndex) {
-        if (npcCollisionIndex < 0) {
-            return;
-        }
-
-        getGamePanel().setGameStatus(GameStatus.DIALOG);
-
-        Entity npc = getGamePanel().getNPCs().get(npcCollisionIndex);
-
-        npc.speak();
-        getGamePanel().getUi().setCurrentDialogLine(npc.getDialog().currentLine());
-        npc.getDialog().nextLine();
-
-        //        getGamePanel().getInputHandler().enterPressed = false;
+    private void interactWithNPC(NPC collidedNPC) {
+        //        if (collidedNPC == null) {
+        //            return;
+        //        }
+        //
+        //        getGamePanel().setGameStatus(GameStatus.DIALOG);
+        //
+        //        collidedNPC.facePlayerWhenTalking(getCurrentDirection());
+        //        collidedNPC.speak(getGamePanel().getUi());
+        //        getGamePanel().getUi().setCurrentDialogLine(collidedNPC.getDialog().currentLine());
+        //        collidedNPC.getDialog().nextLine();
     }
 
     public void draw(Graphics2D graphics2D) {
@@ -86,33 +82,22 @@ public class Player extends Entity {
 
         graphics2D.drawImage(playerImage, getScreenX(), getScreenY(), getGamePanel().getTileSize(), getGamePanel().getTileSize(), null);
         graphics2D.setColor(Color.RED);
-        graphics2D.drawRect(screenX + getHitBox().x, screenY + getHitBox().y, getHitBox().width, getHitBox().height);
+        //        graphics2D.drawRect(screenX + getHitBox().x, screenY + getHitBox().y, getHitBox().width, getHitBox().height);
     }
 
-    public void interactWithObject(int objectIndex) {
-        if (objectIndex < 0) {
+    public void pickUpObject(GameObject gameObject) {
+        if (gameObject == null) {
             return;
         }
 
-        GameObject gameObject = getGamePanel().getGameObjects().get(objectIndex);
+        Candy candyObject = (Candy) gameObject;
 
-        if (gameObject.isInteractable()) {
-            gameObject.interact();
-        }
+        if (candyObject.isConsumable()) {
+            CandyType candyType = candyObject.getCandyType();
 
-    }
-
-    public void pickUpObject(int objectIndex) {
-        if (objectIndex < 0) {
-            return;
-        }
-
-        GameObject gameObject = getGamePanel().getGameObjects().get(objectIndex);
-
-        if (gameObject.isConsumable()) {
-            getGamePanel().getGameObjects().remove(objectIndex);
-            getGamePanel().getUi().setMessage("You collected something!");
-            candyCount++;
+            getGamePanel().getGameObjects().remove(gameObject);
+            getGamePanel().getUi().setMessage("You collected a " + candyType + " candy!");
+            getGamePanel().getGameState().getCandyBucket().addCandy(candyType);
         }
     }
 
@@ -152,13 +137,5 @@ public class Player extends Entity {
 
     private boolean playerIsInMotion() {
         return inputHandler.up || inputHandler.down || inputHandler.left || inputHandler.right;
-    }
-
-    public int getCandyCount() {
-        return candyCount;
-    }
-
-    public void setCandyCount(int candyCount) {
-        this.candyCount = candyCount;
     }
 }

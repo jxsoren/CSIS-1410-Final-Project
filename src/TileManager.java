@@ -51,13 +51,21 @@ public class TileManager {
             int screenX = absoluteWorldX - playerWorldX + playerScreenX;
             int screenY = absoluteWorldY - playerWorldY + playerScreenY;
 
-            // draw tiles on screen
-            graphics2D.drawImage(tileImage, screenX, screenY, gamePanel.getTileSize(), gamePanel.getTileSize(), null);
+            int tileInLength = gamePanel.getTileSize();
+
+            // draw tiles on screen only if the player is close enough to the world tile
+            if (absoluteWorldX + tileInLength > playerWorldX - playerScreenX &&
+                    absoluteWorldX - tileInLength < playerWorldX + playerScreenX
+                    && absoluteWorldY + tileInLength > playerWorldY - playerScreenY
+                    && absoluteWorldY - tileInLength < playerWorldY + playerScreenY
+            ) {
+                graphics2D.drawImage(tileImage, screenX, screenY, tileInLength, tileInLength, null);
+            }
 
             worldColumn++; // increment column pointer to the next column in matrix
 
             // once you've hit the final column for the row, go to the first column of the next row
-            if (worldColumn == gamePanel.MAX_WORLD_ROWS) {
+            if (worldColumn == gamePanel.MAX_WORLD_COLUMNS) {
                 worldColumn = 0; // reset column and current x coordinate pointer
                 worldRow++; // increment row pointer to the next row in matrix
             }
@@ -70,14 +78,34 @@ public class TileManager {
      */
 
     private void initializeTileImages() {
-        for (int i = 0; i <= 56; i++) {
+        for (int i = 0; i <= 281; i++) {
             try {
                 String imagePath = String.format("tiles/mapTiles/tile_%s.png", i);
                 BufferedImage tileImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
 
                 Tile tile = new Tile(tileImage);
 
-                if (i >= 4 && i <= 44) {
+                // Purplish Grey House
+                if (i >= 16 && i <= 53) {
+                    tile.setHasCollision(true);
+                }
+
+                if (i >= 75 && i <= 105) {
+                    tile.setHasCollision(true);
+                }
+
+                // Dark Turquoise House
+                if (i >= 222 && i <= 239) {
+                    tile.setHasCollision(true);
+                }
+
+                // Blue House
+                if (i >= 240 && i <= 257) {
+                    tile.setHasCollision(true);
+                }
+
+                // Stone Walls
+                if (i >= 256 && i <= 280) {
                     tile.setHasCollision(true);
                 }
 

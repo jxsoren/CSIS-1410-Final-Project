@@ -2,7 +2,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class InputHandler implements KeyListener {
-    public boolean up, down, left, right, enterPressed;
+    public boolean up, down, left, right;
     private final GamePanel gamePanel;
 
     public InputHandler(GamePanel gamePanel) {
@@ -24,9 +24,16 @@ public class InputHandler implements KeyListener {
                     case KeyEvent.VK_S, KeyEvent.VK_DOWN -> gamePanel.getUi().incrementMenuOptionNumber();
                     case KeyEvent.VK_ENTER -> {
                         switch (gamePanel.getUi().getMenuOptionNumber()) {
-                            case 0 -> gamePanel.setGameStatus(GameStatus.RUNNING);
+                            case 0 -> gamePanel.setGameStatus(GameStatus.INTRO_SCREEN);
                             case 1 -> System.exit(0);
                         }
+                    }
+                }
+            }
+            case GameStatus.INTRO_SCREEN -> {
+                if (keyCode == KeyEvent.VK_ENTER) {
+                    switch (gamePanel.getUi().getMenuOptionNumber()) {
+                        case 0 -> gamePanel.setGameStatus(GameStatus.RUNNING);
                     }
                 }
             }
@@ -47,8 +54,14 @@ public class InputHandler implements KeyListener {
             }
             case GameStatus.DIALOG -> {
                 switch (keyCode) {
+                    case KeyEvent.VK_W, KeyEvent.VK_UP -> gamePanel.getUi().decrementDialogOptionNumber();
+                    case KeyEvent.VK_S, KeyEvent.VK_DOWN -> gamePanel.getUi().incrementDialogOptionNumber();
                     case KeyEvent.VK_ENTER -> gamePanel.handleRequestedDialog();
-                    case KeyEvent.VK_Q -> gamePanel.setGameStatus(GameStatus.RUNNING);
+                }
+            }
+            case GameStatus.GAME_OVER -> {
+                if (keyCode == KeyEvent.VK_ENTER) {
+                    System.exit(0);
                 }
             }
         }
