@@ -1,6 +1,6 @@
 # Candy Quest
 
-A 2D tile-based adventure game built in Java where players explore a Halloween neighborhood, interact with NPCs, and collect candy through riddle-solving gameplay.
+A 2D tile-based adventure game built in Java where players explore a Halloween neighborhood, interact with NPCs, and collect candy through riddle-solving gameplay. This game was built for the final project of SLCC's CSIS 1410 Object-Oriented Programming class.
 
 ## Gameplay
 
@@ -29,7 +29,7 @@ Players control a character navigating through a Halloween-themed world using ar
 
 Check the [Releases](../../releases) section for downloadable game builds.
 
----
+## Credits
 
 **CSIS 1410 Final Project**  
 *Josh Sorensen, Matt Fitzgerald, Eugene An*
