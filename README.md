@@ -2,6 +2,8 @@
 
 A 2D tile-based adventure game built in Java where players explore a Halloween neighborhood, interact with NPCs, and collect candy through riddle-solving gameplay. This game was built for the final project of SLCC's CSIS 1410 Object-Oriented Programming class.
 
+[![Watch the video](https://img.youtube.com/vi/t_7JQs8GAAg/maxresdefault.jpg)](https://www.youtube.com/watch?v=t_7JQs8GAAg)
+
 ## Gameplay
 
 Players control a character navigating through a Halloween-themed world using arrow key movement. The objective is to explore the neighborhood, interact with various NPCs, and collect different types of candy by successfully answering riddles and questions.
